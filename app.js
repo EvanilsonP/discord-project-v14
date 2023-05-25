@@ -44,6 +44,16 @@ async function main() {                                             // Slash com
 
 main();
 
+client.on('interactionCreate', (interaction) => {
+    if(interaction.isChatInputCommand()) {
+
+        const food = interaction.options.get('food').value;
+        const drink = interaction.options.get('drink').value;
+
+        interaction.reply(`You favorite food is ${food} and your favorite drink is ${drink}`);
+    };
+});
+
 client.on('messageCreate', interactions, welcome, privateMSG);        // Interacts with the user
 client.on('ready', online);                                          // When our bot is online
 client.login(TOKEN);                                                // Log in into our discord bot 
