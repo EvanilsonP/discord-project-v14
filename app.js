@@ -18,6 +18,12 @@ const client = new Client({
     ]
 });
 
+const TOKEN = process.env.TOKEN;
+const CLIENT_ID = process.env.CLIENT_ID;
+const GUILD_ID = process.env.GUILD_ID;
+
+
+
 client.on('messageCreate', interactions, welcome, privateMSG);     // Interacts with the user
 client.on('ready', online);                                       // When our bot is online
-client.login(process.env.TOKEN);                                 // Log in into our discord bot
+client.login(TOKEN);                                              // Log in into our discord bot 
