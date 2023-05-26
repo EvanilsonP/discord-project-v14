@@ -12,6 +12,7 @@ const orderCommand = require('./src/commands/order');
 const suggestionCommand = require('./src/commands/suggestion');
 const channelsCommand = require('./src/commands/channel');
 const buttonCommand = require('./src/commands/button');
+const banCommand = require('./src/commands/ban');
 
 // intents are a set of permissions that your bot can use in order to get access to a set of events
 // client is our bot instance
@@ -31,7 +32,7 @@ const GUILD_ID = process.env.GUILD_ID;
 const rest = new REST({ verison: '10'}).setToken(TOKEN);
 
 async function main() {                                             // Slash commands
-    const commands = [ orderCommand, suggestionCommand, channelsCommand, buttonCommand ];
+    const commands = [ orderCommand, suggestionCommand, channelsCommand, buttonCommand, banCommand, ];
 
     try {
         console.log('Started refreshing application (/) commands.');
