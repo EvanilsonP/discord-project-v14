@@ -12,13 +12,25 @@ const suggestionCommand = new SlashCommandBuilder()
         name: "Interstellar",
         value: 'interstellar'
     },
+
     {        
         name: '12 angry men',
         value: '12 angry men'
     },
+
+    {        
+        name: 'It is a wonderful life',
+        value: 'it is a wonderful life'
+    },
+
+
     {        
         name: 'La vita è bella',
         value: 'la vita è bella'
+    },
+    {        
+        name: 'Psycho',
+        value: 'pyscho'
     },
     )
 )
