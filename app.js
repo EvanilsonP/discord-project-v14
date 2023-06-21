@@ -13,6 +13,7 @@ const suggestionCommand = require('./src/commands/suggestion');
 const channelsCommand = require('./src/commands/channel');
 const buttonCommand = require('./src/commands/button');
 const banCommand = require('./src/commands/ban');
+const kickCommand = require('./src/commands/kick');
 const rolesCommand = require('./src/commands/roles');
 const registerCommand = require('./src/commands/register');
 
@@ -34,7 +35,7 @@ const GUILD_ID = process.env.GUILD_ID;
 const rest = new REST({ verison: '10'}).setToken(TOKEN);
 
 async function main() {                                             // Slash commands
-    const commands = [ orderCommand, suggestionCommand, channelsCommand, buttonCommand, banCommand, rolesCommand, registerCommand];
+    const commands = [ orderCommand, suggestionCommand, channelsCommand, buttonCommand, banCommand, kickCommand, rolesCommand, registerCommand];
 
     try {
         console.log('Started refreshing application (/) commands.');
@@ -106,6 +107,40 @@ client.on('interactionCreate', async (interaction) => {
                 console.error(`Failed to ban ${user.tag}: ${error}`);   
                 await interaction.reply({
                     content: `Failed to ban ${user.tag}.`,
+                    ephemeral: true,
+                  });
+            }
+        } else {
+            await interaction.reply({
+                content: `User ${user.tag} is not a member of this guild.`,
+                ephemeral: true,
+            });
+        }
+    }
+});
+
+client.on('interactionCreate', async (interaction) => {
+    if(!interaction.isCommand()) return;
+
+    if(interaction.commandName === 'kick') {
+        const user = interaction.options.getUser('user');
+        const reason = interaction.options.getString('reason');
+        const member = interaction.guild.members.cache.get(user.id);
+
+        if(member) {
+            try {
+                await member.kick({
+                    reason: reason || undefined
+                });
+                await interaction.reply({
+                    content: `${user.tag} has been kicked.`,
+                    ephemeral: true,
+                  });
+            } 
+            catch (error) {
+                console.error(`Failed to kick ${user.tag}: ${error}`);   
+                await interaction.reply({
+                    content: `Failed to kick ${user.tag}.`,
                     ephemeral: true,
                   });
             }
