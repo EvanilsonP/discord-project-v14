@@ -1,6 +1,6 @@
 const dotenv = require('dotenv');
 dotenv.config();
-const { Client, IntentsBitField, Routes } = require('discord.js');
+const { Client, IntentsBitField, Routes, PermissionsBitField } = require('discord.js');
 const { REST } = require('@discordjs/rest')
 
 const online = require('./src/bot/online');
@@ -16,6 +16,7 @@ const banCommand = require('./src/commands/ban');
 const kickCommand = require('./src/commands/kick');
 const rolesCommand = require('./src/commands/roles');
 const registerCommand = require('./src/commands/register');
+const timeoutCommand = require('./src/commands/timeout');
 
 // intents are a set of permissions that your bot can use in order to get access to a set of events
 // client is our bot instance
@@ -35,7 +36,7 @@ const GUILD_ID = process.env.GUILD_ID;
 const rest = new REST({ verison: '10'}).setToken(TOKEN);
 
 async function main() {                                             // Slash commands
-    const commands = [ orderCommand, suggestionCommand, channelsCommand, buttonCommand, banCommand, kickCommand, rolesCommand, registerCommand];
+    const commands = [ orderCommand, suggestionCommand, channelsCommand, buttonCommand, banCommand, kickCommand, timeoutCommand, rolesCommand, registerCommand];
 
     try {
         console.log('Started refreshing application (/) commands.');
@@ -152,6 +153,63 @@ client.on('interactionCreate', async (interaction) => {
         }
     }
 });
+
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isCommand()) return;
+  
+    const { commandName, options } = interaction;
+  
+    if (commandName === 'timeout') {
+      const user = options.getUser('user');
+      const duration = options.getString('duration');
+      const reason = options.getString('reason');
+  
+      const member = interaction.guild.members.cache.get(user.id);
+  
+      if (member) {
+        try {
+          const timeoutRole = interaction.guild.roles.cache.find(role => role.name === 'Timeout');
+  
+          if (!timeoutRole) {
+            // Create a role named "Timeout" if it doesn't exist
+            const createdRole = await interaction.guild.roles.create({
+              name: 'Timeout',
+              color: '#ff0000',
+              permissions: [],
+              reason: 'Timeout role for temporary member restrictions',
+            });
+  
+            await member.roles.add(createdRole, reason || undefined);
+          } else {
+            await member.roles.add(timeoutRole, reason || undefined);
+          }
+  
+          await interaction.reply({
+            content: `${user.tag} has been timed out for ${duration}.`,
+            ephemeral: true,
+          });
+  
+          setTimeout(async () => {
+            if (timeoutRole) {
+              await member.roles.remove(timeoutRole, 'Timeout duration has expired');
+              await interaction.followUp(`${user.tag} has been un-timed out.`);
+            }
+          }, ms(duration));
+        } catch (error) {
+          console.error(`Failed to timeout ${user.tag}: ${error}`);
+          await interaction.reply({
+            content: `Failed to timeout ${user.tag}.`,
+            ephemeral: true,
+          });
+        }
+      } else {
+        await interaction.reply({
+          content: `User ${user.tag} is not a member of this guild.`,
+          ephemeral: true,
+        });
+      }
+    }
+  });
 
 client.on('messageCreate', interactions, welcome, privateMSG);        // Interacts with the user
 client.on('ready', online);                                          // When our bot is online
